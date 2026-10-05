@@ -715,6 +715,7 @@
       <ul>
         <li>Pitches explanations at your level, using analogies you choose.</li>
         <li>Asks Claude to explain <em>why</em> before <em>what</em>, narrate as it acts, and push back when you ask for the wrong thing.</li>
+        <li>Has Claude save the output of every script and API call to a file, so follow-up questions don&rsquo;t mean paying to re-run it.</li>
         <li>Sets <strong>guardrails</strong>: pause-and-check rules for heavy installs, spending, irreversible actions, and anything that looks like real company data. Leave that section as written.</li>
       </ul>
       <p>Copy the block and fill in the About me section. Then pick one of two ways to save it:</p>
@@ -763,6 +764,11 @@ I'm doing these labs to get hands-on with modern AI tools so I can make better d
 **Less good:** *"That's a tokenization issue."*
 
 **Better:** *"That's a tokenization issue. The model splits your text into chunks before it reads it, and different models count chunks differently. The same sentence might be 30 chunks to one model and 22 to another, which changes the price. Want me to show you the count?"*
+
+## Keep a record
+
+- **Save what you run.** When you run a script or call an API, save the full output to a file in this folder (an `outputs/` folder is fine) and tell me the file name.
+- **Check the record before re-running.** If I ask a follow-up question about something that already ran, read the saved output first. Only re-run it if the answer isn't there, and tell me before you do.
 
 ## Guardrails: when to pause and check with me (don't edit this section)
 
@@ -827,7 +833,7 @@ This is a learning exercise, not a production project. Pick the path that teache
       <h4>Running the labs</h4>
       <ul>
         <li><strong>Read the full opening prompt before pasting it.</strong> The summary at the top of each lab is a teaser, not the instruction.</li>
-        <li><strong>Save results as you go.</strong> Early in each lab, tell Claude: <em>&ldquo;From here on, save all outputs and results to a markdown file in this folder.&rdquo;</em> That way you never pay twice to see a result you already generated.</li>
+        <li><strong>Save results as you go.</strong> The <em>Keep a record</em> section of your <code>CLAUDE.md</code> already tells Claude to save every output to a file in the lab folder. If you notice it isn&rsquo;t, tell Claude: <em>&ldquo;From here on, save all outputs and results to a markdown file in this folder.&rdquo;</em> That way you never pay twice to see a result you already generated.</li>
         <li><strong>Auto mode will occasionally stop and ask.</strong> Some installers, like Homebrew&rsquo;s, work by downloading a script and running it. Auto mode blocks that pattern by default and hands it to you. If it&rsquo;s the official installer for a tool the lab asked for, approve it. If you&rsquo;re not sure what you&rsquo;re approving, ask Claude to explain first.</li>
         <li><strong><code>/rewind</code> is your undo button.</strong> Press <code>Esc</code> twice (or type <code>/rewind</code>) to roll the conversation and Claude&rsquo;s file edits back to an earlier point. It can&rsquo;t undo things that happened outside your folder: installs, API calls, or anything pushed to the internet.</li>
         <li><strong>Closed the terminal by accident?</strong> Run <code>claude --continue</code> in the same folder to pick up the conversation where you left off.</li>
@@ -2392,7 +2398,8 @@ This is a learning exercise, not a production project. Pick the path that teache
         <li>Tell Claude this is a <strong>teaching artifact</strong>, not production code. Short, heavily commented, no error handling beyond the basics. The point is for a non-programmer to read it.</li>
         <li>For <code>web_search</code>, the easiest path is the free <a href="https://duckduckgo.com/">DuckDuckGo</a> search via a Python package (no API key needed). Let Claude pick the package. <code>get_local_time</code> is just a few lines of Python using a timezone library — no API needed.</li>
         <li>When Claude finishes, ask it to <strong>highlight the loop</strong> — literally point you to the lines that are &ldquo;the harness.&rdquo; That&rsquo;s the moment of the codelab.</li>
-        <li>Don&rsquo;t worry if a couple of terms in the code are new — &ldquo;system prompt,&rdquo; &ldquo;tool schema,&rdquo; &ldquo;tool_use block.&rdquo; Ask Claude to define each one in one sentence as it goes.</li>
+        <li>Don&rsquo;t worry if a couple of terms in the code are new — &ldquo;system prompt,&rdquo; &ldquo;tool schema,&rdquo; &ldquo;tool call.&rdquo; Ask Claude to define each one in one sentence as it goes.</li>
+        <li>OpenRouter uses OpenAI&rsquo;s request format, not Anthropic&rsquo;s, even when the model behind it is Claude. Tell Claude to stick with the OpenAI-style format from start to finish. If an error mentions <code>tool_use</code> or <code>stop_reason</code>, the code has mixed the two formats. Paste the error back and ask Claude to fix it.</li>
       </ul>
 
       <h4>Suggested prompts</h4>
@@ -2412,7 +2419,7 @@ This is a learning exercise, not a production project. Pick the path that teache
         <br>1. Point me to the <code>while</code> loop. That&rsquo;s &ldquo;the harness,&rdquo; right? Say it out loud.
         <br>2. Show me where the tools are <em>defined</em> (the Python functions) versus where they&rsquo;re <em>described</em> to the model (the schema).
         <br>3. Show me the exact line where, when the model says &ldquo;I want to call <code>web_search</code>,&rdquo; our code actually runs the function.
-        <br>4. Explain in one sentence each: &ldquo;system prompt,&rdquo; &ldquo;tool schema,&rdquo; &ldquo;tool_use block,&rdquo; &ldquo;tool_result block.&rdquo;</p>
+        <br>4. Explain in one sentence each: &ldquo;system prompt,&rdquo; &ldquo;tool schema,&rdquo; &ldquo;tool call,&rdquo; &ldquo;tool result.&rdquo;</p>
       </blockquote>
 
       <aside class="callout why">
@@ -2565,7 +2572,7 @@ This is a learning exercise, not a production project. Pick the path that teache
         <li><strong>The API call fails with an auth error.</strong> Ask Claude to check that the environment variable is set in the same shell the script is running in, and walk you through fixing it. Don&rsquo;t paste your key into the chat to &ldquo;help debug.&rdquo;</li>
         <li><strong>The harness runs forever, looping on the same tool.</strong> Add an iteration cap. Ask Claude: &ldquo;Add a maximum loop count of 10 and explain why every harness needs one.&rdquo; That&rsquo;s a real lesson too.</li>
         <li><strong>The <code>web_search</code> tool returns garbage or nothing.</strong> Ask Claude to swap the underlying search library or print the raw search results so you can see what the model is actually getting back.</li>
-        <li><strong>You don&rsquo;t recognize a term in <code>harness.py</code> — &ldquo;messages list,&rdquo; &ldquo;tool_use,&rdquo; &ldquo;stop_reason.&rdquo;</strong> Don&rsquo;t Google it. Paste the line into Claude and ask it to explain that one piece in plain English with an analogy.</li>
+        <li><strong>You don&rsquo;t recognize a term in <code>harness.py</code> — &ldquo;messages list,&rdquo; &ldquo;tool_calls,&rdquo; &ldquo;finish_reason.&rdquo;</strong> Don&rsquo;t Google it. Paste the line into Claude and ask it to explain that one piece in plain English with an analogy.</li>
         <li><strong>The small model in Milestone 5 won&rsquo;t call tools at all.</strong> That&rsquo;s a finding, not a bug. Write it down as part of your comparison. Then ask Claude to explain why — what makes tool-calling hard for smaller models.</li>
       </ul>
     </section>
@@ -2576,7 +2583,7 @@ This is a learning exercise, not a production project. Pick the path that teache
       <ul>
         <li>Add a third tool of your own choosing — something that would actually matter in your company. A <code>read_pdf</code> tool, a <code>send_email_draft</code> tool, a <code>lookup_account_in_crm</code> tool. Back it with a small fake CSV of accounts, not your real CRM. The pattern is the same: write the Python function, describe it as a tool, add nothing else to the loop. Notice that the harness itself didn&rsquo;t change.</li>
         <li>Take the harness and run it as a small chatbot — keep the conversation going across multiple user turns instead of exiting after one question. Ask Claude what changes (very little: you keep appending to the messages list).</li>
-        <li>Look at <a href="https://github.com/anthropics/claude-code">Claude Code&rsquo;s source on GitHub</a> and find the equivalent <code>while</code> loop. It&rsquo;s a much bigger codebase, but the heart of it is the same shape you just built. Spot the loop. That&rsquo;s the only homework.</li>
+        <li>Look at <a href="https://github.com/anomalyco/opencode">OpenCode&rsquo;s source on GitHub</a> (an open-source harness) and find the equivalent <code>while</code> loop. It&rsquo;s a much bigger codebase, but the heart of it is the same shape you just built. Spot the loop. That&rsquo;s the only homework.</li>
       </ul>
     </section>
 
@@ -2753,6 +2760,7 @@ This is a learning exercise, not a production project. Pick the path that teache
       <ul>
         <li>Hand the shortlist to Claude and ask it to pick two or three. Have it explain the design choice — which endpoints, what arguments, what each tool returns. This is where the LLM-craft is.</li>
         <li>The hardest part of the NWS API isn&rsquo;t the calls — it&rsquo;s that you have to look up the &ldquo;office&rdquo; and &ldquo;grid&rdquo; for a lat/lon before you can fetch a forecast. Let Claude handle that chaining. You don&rsquo;t need to understand it; you need to notice that Claude is doing it.</li>
+        <li>Not every NWS forecast comes back as neat, structured data. Some, marine forecasts in particular, come back as a plain-text bulletin. If a tool returns an error or a wall of text, ask Claude to read and summarize that text rather than hunt for a different endpoint.</li>
         <li>Don&rsquo;t hand-test the tools by curling the API. Ask Claude to write a tiny test script that calls each tool directly (no MCP, no Claude in the loop yet) and prints the result. That&rsquo;s the unit-test step.</li>
       </ul>
 
@@ -4042,6 +4050,7 @@ This is a learning exercise, not a production project. Pick the path that teache
         <li>Open a second terminal window <em>next</em> to Claude Code (not on top of it), so when you look at the screen, you see both. The point is for the meter to be visible to you, not buried.</li>
         <li>Make the meter live. Run <code>/statusline</code> and ask for a status line that shows the session&rsquo;s running cost and context usage. It sits at the bottom of the Claude Code window and updates as the agents work.</li>
         <li><strong>Want a hard ceiling?</strong> Instead of pasting the orchestrator prompt into the interactive session, save it as <code>orchestrator.md</code> and run the pipeline headless with a budget cap: <code>claude -p "$(cat orchestrator.md)" --permission-mode auto --max-budget-usd 25</code>. Claude Code stops spawning work once spend hits the cap, subagents included. You lose the live view, but you get a guarantee. Same mechanism your engineers would use to run agents in CI.</li>
+        <li><strong>Clear the permission prompts before you leave.</strong> Auto mode doesn&rsquo;t skip every check, so a push, PR, or merge can stop and wait for your approval while you&rsquo;re away. Have Claude pre-approve only the <code>git</code> and <code>gh</code> commands the pipeline needs, for this project folder only, then run each one once now. If anything is going to ask, it asks while you&rsquo;re still at the desk.</li>
         <li>Write the orchestrator prompt now so you can read it once more before you commit. It should be short. One sentence to the Planner: read the PRD, write the plan, hand off to Builder. The rest of the chain is defined by the agent prompts you wrote in Milestone 2.</li>
       </ul>
 
@@ -4053,7 +4062,12 @@ This is a learning exercise, not a production project. Pick the path that teache
 
       <blockquote class="prompt">
         <span class="prompt-label">Paste into Claude</span>
-        <p>Draft the single orchestrator prompt I&rsquo;ll paste in to kick off the whole pipeline. It should invoke the Planner first, instruct it to read <code>PRD.md</code> and produce <code>PLAN.md</code>, then hand off to the Builder, and so on through Merger. The prompt should also tell the chain to stop and surface a clear summary if any agent gets stuck for more than two attempts. Show me the prompt &mdash; I want to read it before I run it.</p>
+        <p>Before I walk away, I want to make sure nothing in this pipeline stops to ask me for permission. Add permission rules for this project folder only (not my global settings) that pre-approve the commands the agents need against my scratch repo: <code>git push</code>, <code>gh pr create</code>, <code>gh pr review</code>, <code>gh pr comment</code>, and <code>gh pr merge</code>. Don&rsquo;t approve anything broader than that. Then test it: push a throwaway branch with a one-line README change, open a PR, and merge it. Tell me whether anything asked for approval or was blocked, and fix it before we go on.</p>
+      </blockquote>
+
+      <blockquote class="prompt">
+        <span class="prompt-label">Paste into Claude</span>
+        <p>Draft the single orchestrator prompt I&rsquo;ll paste in to kick off the whole pipeline. It should invoke the Planner first, instruct it to read <code>PRD.md</code> and produce <code>PLAN.md</code>, then hand off to the Builder, and so on through Merger. It should tell the agents they&rsquo;re cleared to push branches and to open, review, and merge pull requests in this scratch repo without checking with me first. The prompt should also tell the chain to stop and surface a clear summary if any agent gets stuck for more than two attempts. Show me the prompt &mdash; I want to read it before I run it.</p>
       </blockquote>
 
       <aside class="callout try">
@@ -4063,7 +4077,7 @@ This is a learning exercise, not a production project. Pick the path that teache
 
       <div class="checkpoint">
         <span class="checkpoint-icon">&#10003;</span>
-        <span class="checkpoint-text">You have two terminals visible, you know what <code>/usage</code> shows right now, and you have an orchestrator prompt ready to paste. You have not yet pressed Enter.</span>
+        <span class="checkpoint-text">You have two terminals visible, you know what <code>/usage</code> shows right now, and you have an orchestrator prompt ready to paste. Your test PR merged without a permission prompt. You have not yet pressed Enter.</span>
       </div>
     </section>
 
@@ -4177,7 +4191,7 @@ This is a learning exercise, not a production project. Pick the path that teache
         <li><strong>The agents are looping and the meter is climbing fast.</strong> Stop the run with Ctrl-C. Ask Claude to look at the trace and tell you which two agents are bouncing the work back and forth. The fix is almost always a clearer handoff condition in one of the prompts, or a tighter acceptance criterion in the PRD.</li>
         <li><strong>The Reviewer rubber-stamped a bad PR.</strong> That&rsquo;s a prompt problem, not a model problem. Strengthen the Reviewer&rsquo;s role description &mdash; explicitly forbid &ldquo;LGTM&rdquo; with no substantive comments, and require it to list at least two things it considered rejecting. Then run again.</li>
         <li><strong>The Builder went way out of scope.</strong> Your PRD&rsquo;s &ldquo;out of scope&rdquo; section was too short. Add specifics. &ldquo;Do not add tests beyond the three listed.&rdquo; &ldquo;Do not introduce new dependencies.&rdquo; Specificity beats hope.</li>
-        <li><strong>The pipeline stalled and a subagent is waiting on me.</strong> Read what it&rsquo;s asking. If it&rsquo;s a clarifying question that should have been answered in the PRD, answer it now and then go back and update the PRD for next time. If it&rsquo;s a permission/credential issue, fix that and resume.</li>
+        <li><strong>The pipeline stalled and a subagent is waiting on me.</strong> Read what it&rsquo;s asking. If it&rsquo;s a clarifying question that should have been answered in the PRD, answer it now and then go back and update the PRD for next time. If it&rsquo;s a permission/credential issue, fix that and resume. If it stopped on a permission prompt for a <code>git</code> or <code>gh</code> command, approve it, then ask Claude to add that command to the pre-approved list from Milestone 3 so the next run doesn&rsquo;t stall.</li>
         <li><strong>The PR never opened.</strong> Almost always <code>gh</code> auth or a missing remote. Ask Claude to verify <code>gh auth status</code> and the remote URL, and to re-run the PR step.</li>
       </ul>
     </section>
